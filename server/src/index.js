@@ -49,6 +49,16 @@ if (fs.existsSync(publicDir)) {
     }
     res.sendFile(path.join(publicDir, 'index.html'));
   });
+} else {
+  app.get('/', (req, res) => {
+    res.json({
+      name: 'BalanceVault API',
+      status: 'UP',
+      health: '/health',
+      ready: '/ready',
+      message: 'Backend API is running. Run npm run build to compile the React frontend.'
+    });
+  });
 }
 
 // 404 Handler for API routes
@@ -62,7 +72,7 @@ app.use('/api/*', (req, res) => {
 // Centralized Error Handler
 app.use(errorHandler);
 
-const server = app.listen(config.port, () => {
+const server = app.listen(config.port, '0.0.0.0', () => {
   console.log('====================================================');
   console.log(`🚀 BalanceVault API running on port ${config.port}`);
   console.log(`   Health check: http://localhost:${config.port}/health`);

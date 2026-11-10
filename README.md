@@ -57,9 +57,11 @@ The system is built as a complete, production-ready, full-stack application:
 #### Option A: Quickstart (Zero Configuration)
 Clone the repository and run:
 ```bash
-# 1. Install dependencies
-npm --prefix server install
-npm --prefix client install
+# 1. Install dependencies (npm workspaces installs root, server, and client)
+npm install
+
+# (Alternative if installing individual workspaces manually)
+# npm --prefix server install && npm --prefix client install
 
 # 2. Run the 14-point Verification & Integrity Test Suite
 npm test
