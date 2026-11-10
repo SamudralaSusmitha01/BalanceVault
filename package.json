@@ -1,0 +1,30 @@
+{
+  "name": "balancevault",
+  "version": "1.0.0",
+  "description": "BalanceVault — Money movement with a ledger you can prove",
+  "type": "module",
+  "main": "server/src/index.js",
+  "scripts": {
+    "start": "node server/src/index.js",
+    "dev": "node scripts/dev.js",
+    "dev:server": "node server/src/index.js",
+    "dev:client": "cd client && npm run dev",
+    "build": "node scripts/build.js",
+    "test": "node server/tests/run-tests.js",
+    "db:generate": "node scripts/db-generate.js",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "admin:bootstrap": "node scripts/bootstrap-admin.js"
+  },
+  "keywords": [
+    "fintech",
+    "ledger",
+    "double-entry",
+    "audit-trail",
+    "rbac",
+    "banking",
+    "provable-ledger"
+  ],
+  "author": "BalanceVault Team",
+  "license": "MIT"
+}

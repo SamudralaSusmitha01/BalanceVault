@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  AUDITOR
+  USER
+}
+
+enum UserStatus {
+  PENDING_ONBOARDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  SYSTEM_VAULT
+}
+
+enum TransactionType {
+  TRANSFER
+  DEPOSIT
+  SYSTEM_ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum LedgerEntryType {
+  DEBIT
+  CREDIT
+}
+
+model User {
+  id             String          @id @default(uuid())
+  email          String          @unique
+  passwordHash   String
+  fullName       String
+  role           Role            @default(USER)
+  status         UserStatus      @default(PENDING_ONBOARDING)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  accounts       Account[]
+  kycApplication KycApplication?
+  auditLogs      AuditLog[]
+
+  @@map("users")
+}
+
+model KycApplication {
+  id                      String    @id @default(uuid())
+  userId                  String    @unique
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  legalName               String
+  dateOfBirth             String
+  idType                  String
+  idNumber                String
+  initialDepositRequested Float     @default(0.0)
+  status                  KycStatus @default(PENDING)
+  reviewedBy              String?
+  reviewNotes             String?
+  submittedAt             DateTime  @default(now())
+  reviewedAt              DateTime?
+
+  @@map("kyc_applications")
+}
+
+model Account {
+  id            String        @id @default(uuid())
+  accountNumber String        @unique
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency      String        @default("USD")
+  balance       Float         @default(0.0)
+  status        AccountStatus @default(ACTIVE)
+  accountType   AccountType   @default(CHECKING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  ledgerEntries LedgerEntry[]
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id                   String            @id @default(uuid())
+  reference            String            @unique
+  idempotencyKey       String?           @unique
+  sourceAccountId      String?
+  destinationAccountId String
+  amount               Float
+  currency             String            @default("USD")
+  type                 TransactionType   @default(TRANSFER)
+  status               TransactionStatus @default(COMPLETED)
+  initiatedByUserId    String
+  memo                 String?
+  createdAt            DateTime          @default(now())
+  ledgerEntries        LedgerEntry[]
+
+  @@map("transactions")
+}
+
+model LedgerEntry {
+  id             String          @id @default(uuid())
+  sequenceNumber Int             @unique @default(autoincrement())
+  transactionId  String
+  transaction    Transaction     @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  accountId      String
+  account        Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  entryType      LedgerEntryType
+  amount         Float
+  balanceBefore  Float
+  balanceAfter   Float
+  previousHash   String
+  currentHash    String
+  createdAt      DateTime        @default(now())
+
+  @@index([accountId])
+  @@index([transactionId])
+  @@map("ledger_entries")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  timestamp    DateTime @default(now())
+  actorId      String?
+  actorEmail   String?
+  actorRole    String?
+  action       String
+  resourceType String
+  resourceId   String?
+  ipAddress    String?
+  userAgent    String?
+  status       String   @default("SUCCESS")
+  details      String?
+  user         User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([timestamp])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
