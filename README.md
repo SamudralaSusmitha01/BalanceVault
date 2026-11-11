@@ -1,10 +1,15 @@
 # BalanceVault — Money Movement with a Ledger You Can Prove
 
-[![Verification Tests](https://img.shields.io/badge/Ledger%20Tests-14%2F14%20Passing-emerald)](file:///server/tests/run-tests.js)
-[![Integrity Chain](https://img.shields.io/badge/Audit%20Proof-SHA--256%20Double--Entry-blue)](#provable-ledger-architecture)
+[![Verification Tests](https://img.shields.io/badge/Threat%20Tests-17%2F17%20Passing-emerald)](file:///server/tests/run-tests.js)
+[![Threat Model](https://img.shields.io/badge/THREATS.md-13%20Vectors%20Tested-red)](file:///THREATS.md)
+[![AI Log](https://img.shields.io/badge/PROMPTS.md-6%20Dated%20Entries-blue)](file:///PROMPTS.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-gray.svg)](LICENSE)
 
 A high-integrity account management and value transfer platform engineered around a **server-enforced role-based access control (RBAC) model**, an **end-to-end user onboarding KYC workflow**, and an **immutable, cryptographically verifiable double-entry ledger**.
+
+> **Evaluation Quick Links:**
+> - [**THREATS.md**](file:///THREATS.md) — 13 threat vectors with server mitigations, live testing instructions, and 1-to-1 test mappings.
+> - [**PROMPTS.md**](file:///PROMPTS.md) — 6 dated AI interaction logs detailing what AI got wrong and the engineering fixes applied.
 
 ---
 
@@ -63,7 +68,7 @@ npm install
 # (Alternative if installing individual workspaces manually)
 # npm --prefix server install && npm --prefix client install
 
-# 2. Run the 14-point Verification & Integrity Test Suite
+# 2. Run the 17-point Threat Verification & Integrity Test Suite
 npm test
 
 # 3. Seed demo accounts (Admin, Auditor, Alice, Bob)
