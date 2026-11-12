@@ -11,7 +11,13 @@ import {
   CreditCard,
   Layers,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Search,
+  CheckCircle2,
+  AlertOctagon,
+  Clock,
+  ShieldCheck,
+  FileText
 } from 'lucide-react';
 
 export function AdminPage() {
@@ -21,6 +27,8 @@ export function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [message, setMessage] = useState('');
+  const [kycFilter, setKycFilter] = useState('ALL'); // 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  const [accountSearch, setAccountSearch] = useState('');
 
   const loadAdminData = async () => {
     setLoading(true);
@@ -71,140 +79,198 @@ export function AdminPage() {
     }
   };
 
+  // Filter KYC applications
+  const filteredKycApps = kycApps.filter(app => {
+    if (kycFilter === 'ALL') return true;
+    return app.status === kycFilter;
+  });
+
+  // Filter accounts
+  const filteredAccounts = accounts.filter(acc => {
+    if (!accountSearch) return true;
+    const term = accountSearch.toLowerCase();
+    const accNumMatch = acc.accountNumber?.toLowerCase().includes(term);
+    const holderMatch = acc.user?.fullName?.toLowerCase().includes(term);
+    const emailMatch = acc.user?.email?.toLowerCase().includes(term);
+    return accNumMatch || holderMatch || emailMatch;
+  });
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f172a] p-6 rounded-3xl border border-gray-800 shadow-xl">
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center space-x-2">
-            <UserCheck className="w-6 h-6 text-red-400" />
-            <span>Administrative Command & Control</span>
+      {/* Header Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-red-950/20 via-[#0f172a] to-gray-900 p-6 sm:p-7 rounded-3xl border border-red-900/30 shadow-xl">
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-mono tracking-wider font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 uppercase">
+              Root Authority Mode
+            </span>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 border border-gray-700">
+              ROLE: ADMIN
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center space-x-2">
+            <span>Root Command & Administrative Control</span>
           </h1>
-          <p className="text-xs text-gray-400 mt-1">
-            Server-enforced user onboarding review, account control, and system ledger oversight
+          <p className="text-xs text-gray-400">
+            KYC onboarding approval, account enforcement, and system reserve monitoring
           </p>
         </div>
 
         <button
           onClick={loadAdminData}
-          className="p-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs flex items-center space-x-1.5 transition-colors"
+          className="p-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs flex items-center space-x-1.5 transition-colors border border-gray-700/60"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
+          <span>Refresh Data</span>
         </button>
       </div>
 
       {message && (
-        <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-xs font-medium">
-          {message}
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-xs font-medium flex items-center space-x-2 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+          <span>{message}</span>
         </div>
       )}
 
-      {/* KPI Stats */}
+      {/* KPI Stats Cards */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800">
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-              Total Users
-            </span>
-            <div className="text-2xl font-bold text-white font-mono">{stats.userCount}</div>
+          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800 shadow-lg">
+            <div className="flex items-center justify-between text-gray-400 mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider">Total Users</span>
+              <Users className="w-4 h-4 text-gray-500" />
+            </div>
+            <div className="text-3xl font-bold text-white font-mono">{stats.userCount}</div>
+            <span className="text-[10px] text-gray-500 mt-1 block">Registered profiles</span>
           </div>
 
-          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800">
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-              Active Accounts
-            </span>
-            <div className="text-2xl font-bold text-emerald-400 font-mono">{stats.accountCount}</div>
+          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800 shadow-lg">
+            <div className="flex items-center justify-between text-emerald-400 mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Active Accounts</span>
+              <CreditCard className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="text-3xl font-bold text-emerald-400 font-mono">{stats.accountCount}</div>
+            <span className="text-[10px] text-gray-500 mt-1 block">Funded vault checking</span>
           </div>
 
-          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800">
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-              Ledger Blocks
-            </span>
-            <div className="text-2xl font-bold text-teal-400 font-mono">{stats.ledgerEntryCount}</div>
+          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800 shadow-lg">
+            <div className="flex items-center justify-between text-teal-400 mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Ledger Blocks</span>
+              <Layers className="w-4 h-4 text-teal-400" />
+            </div>
+            <div className="text-3xl font-bold text-teal-400 font-mono">{stats.ledgerEntryCount}</div>
+            <span className="text-[10px] text-gray-500 mt-1 block">Cryptographic chained records</span>
           </div>
 
-          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800">
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
-              Pending KYC
-            </span>
-            <div className="text-2xl font-bold text-amber-400 font-mono">{stats.pendingKycCount}</div>
+          <div className="bg-[#0f172a] p-5 rounded-2xl border border-gray-800 shadow-lg">
+            <div className="flex items-center justify-between text-amber-400 mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Pending Review</span>
+              <Clock className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="text-3xl font-bold text-amber-400 font-mono">{stats.pendingKycCount}</div>
+            <span className="text-[10px] text-gray-500 mt-1 block">Awaiting KYC decision</span>
           </div>
         </div>
       )}
 
       {/* KYC Review Queue */}
-      <div className="bg-[#0f172a] border border-gray-800 rounded-3xl p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-[#0f172a] border border-gray-800 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-white">KYC Onboarding Queue</h3>
-            <p className="text-xs text-gray-400">Approve or reject customer registration applications</p>
+            <div className="flex items-center space-x-2">
+              <UserCheck className="w-5 h-5 text-red-400" />
+              <h3 className="text-lg font-bold text-white tracking-tight">KYC Onboarding Approval Queue</h3>
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Review and approve applicant identities to allocate accounts and test funds
+            </p>
           </div>
-          <span className="text-xs font-mono text-amber-400 font-semibold">
-            {kycApps.filter(k => k.status === 'PENDING').length} Pending Review
-          </span>
+
+          {/* Filter pills */}
+          <div className="flex items-center space-x-1 bg-gray-900 p-1 rounded-xl border border-gray-800 text-[11px] font-mono">
+            {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map(f => (
+              <button
+                key={f}
+                onClick={() => setKycFilter(f)}
+                className={`px-3 py-1 rounded-lg transition-colors capitalize ${
+                  kycFilter === f ? 'bg-gray-800 text-white font-bold' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {f.toLowerCase()}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {kycApps.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 text-xs font-mono">
-            No KYC applications submitted yet.
+        {filteredKycApps.length === 0 ? (
+          <div className="p-12 text-center border border-dashed border-gray-800 rounded-2xl">
+            <CheckCircle2 className="w-10 h-10 text-emerald-500/60 mx-auto mb-3" />
+            <div className="text-sm font-semibold text-gray-300">Queue is Clear</div>
+            <p className="text-xs text-gray-500 mt-1">
+              No KYC applications matching the selected filter.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
                 <tr className="border-b border-gray-800 text-gray-400">
-                  <th className="pb-3">Applicant Name</th>
-                  <th className="pb-3">ID Type & Number</th>
-                  <th className="pb-3">DOB</th>
-                  <th className="pb-3">Requested Deposit</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3 text-right">Actions</th>
+                  <th className="pb-3 font-semibold">Applicant Legal Name</th>
+                  <th className="pb-3 font-semibold">Document Details</th>
+                  <th className="pb-3 font-semibold">DOB</th>
+                  <th className="pb-3 font-semibold">Requested Deposit</th>
+                  <th className="pb-3 font-semibold">Status</th>
+                  <th className="pb-3 font-semibold text-right">Administrative Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60">
-                {kycApps.map(app => (
+                {filteredKycApps.map(app => (
                   <tr key={app.id} className="hover:bg-gray-900/40 transition-colors">
-                    <td className="py-3 font-semibold text-gray-200">
+                    <td className="py-3.5 font-semibold text-gray-200">
                       {app.legalName}
-                      <span className="block text-[10px] text-gray-500 font-normal">{app.user?.email}</span>
+                      <span className="block text-[11px] text-gray-500 font-normal font-sans">{app.user?.email}</span>
                     </td>
-                    <td className="py-3 text-gray-300">
-                      {app.idType}: {app.idNumber}
+                    <td className="py-3.5 text-gray-300">
+                      <span className="px-1.5 py-0.5 rounded bg-gray-900 border border-gray-800 text-[10px]">
+                        {app.idType}
+                      </span>
+                      <span className="ml-1.5 text-gray-300 font-mono">{app.idNumber}</span>
                     </td>
-                    <td className="py-3 text-gray-400">{app.dateOfBirth}</td>
-                    <td className="py-3 font-bold text-emerald-400">
+                    <td className="py-3.5 text-gray-400">{app.dateOfBirth}</td>
+                    <td className="py-3.5 font-bold text-emerald-400">
                       ${Number(app.initialDepositRequested).toFixed(2)} USD
                     </td>
-                    <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <td className="py-3.5">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                         app.status === 'APPROVED'
-                          ? 'bg-emerald-500/10 text-emerald-400'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                           : app.status === 'REJECTED'
-                          ? 'bg-rose-500/10 text-rose-400'
-                          : 'bg-amber-500/10 text-amber-400'
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                          : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
                       }`}>
                         {app.status}
                       </span>
                     </td>
-                    <td className="py-3 text-right space-x-2">
-                      {app.status === 'PENDING' && (
+                    <td className="py-3.5 text-right space-x-2">
+                      {app.status === 'PENDING' ? (
                         <>
                           <button
                             onClick={() => handleReviewKyc(app.id, 'APPROVE')}
                             disabled={actionLoading === app.id}
-                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold transition-colors disabled:opacity-50"
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
                           >
-                            Approve
+                            Approve & Fund
                           </button>
                           <button
                             onClick={() => handleReviewKyc(app.id, 'REJECT')}
                             disabled={actionLoading === app.id}
-                            className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[11px] font-semibold transition-colors disabled:opacity-50"
+                            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
                           >
                             Reject
                           </button>
                         </>
+                      ) : (
+                        <span className="text-[11px] text-gray-500 italic">Review Completed</span>
                       )}
                     </td>
                   </tr>
@@ -215,66 +281,83 @@ export function AdminPage() {
         )}
       </div>
 
-      {/* Account Control & Freeze Management */}
-      <div className="bg-[#0f172a] border border-gray-800 rounded-3xl p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
+      {/* Account Control & Freeze Management Section */}
+      <div className="bg-[#0f172a] border border-gray-800 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-white">System Accounts & Status Management</h3>
-            <p className="text-xs text-gray-400">Freeze or unfreeze customer accounts to halt unauthorized transfers</p>
+            <div className="flex items-center space-x-2">
+              <CreditCard className="w-5 h-5 text-red-400" />
+              <h3 className="text-lg font-bold text-white tracking-tight">System Accounts & Status Enforcement</h3>
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Instantly freeze customer accounts to prevent fraudulent transfers or unfreeze upon audit review
+            </p>
           </div>
-          <span className="text-xs font-mono text-gray-500">{accounts.length} total account(s)</span>
+
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-gray-500 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              placeholder="Search account or user..."
+              value={accountSearch}
+              onChange={(e) => setAccountSearch(e.target.value)}
+              className="pl-8 pr-3 py-1.5 bg-gray-900 border border-gray-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 font-mono w-56"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
               <tr className="border-b border-gray-800 text-gray-400">
-                <th className="pb-3">Account Number</th>
-                <th className="pb-3">Account Holder</th>
-                <th className="pb-3">Type</th>
-                <th className="pb-3">Balance</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3 text-right">Enforcement</th>
+                <th className="pb-3 font-semibold">Account Number</th>
+                <th className="pb-3 font-semibold">Account Holder</th>
+                <th className="pb-3 font-semibold">Vault Type</th>
+                <th className="pb-3 font-semibold">Settled Balance</th>
+                <th className="pb-3 font-semibold">Status</th>
+                <th className="pb-3 font-semibold text-right">Enforcement Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/60">
-              {accounts.map(acc => {
+              {filteredAccounts.map(acc => {
                 const isFrozen = acc.status === 'FROZEN';
                 const isVault = acc.accountType === 'SYSTEM_VAULT';
 
                 return (
                   <tr key={acc.id} className="hover:bg-gray-900/40 transition-colors">
-                    <td className="py-3 font-bold text-emerald-400">{acc.accountNumber}</td>
-                    <td className="py-3 text-gray-200">
+                    <td className="py-3.5 font-bold text-emerald-400">{acc.accountNumber}</td>
+                    <td className="py-3.5 text-gray-200">
                       {acc.user?.fullName || 'System Reserve'}
-                      <span className="block text-[10px] text-gray-500 font-normal">{acc.user?.email || 'vault@internal'}</span>
+                      <span className="block text-[11px] text-gray-500 font-normal font-sans">
+                        {acc.user?.email || 'internal@balancevault.system'}
+                      </span>
                     </td>
-                    <td className="py-3 text-gray-400">{acc.accountType}</td>
-                    <td className="py-3 font-bold text-white">
-                      ${Number(acc.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <td className="py-3.5 text-gray-400">{acc.accountType}</td>
+                    <td className="py-3.5 font-bold text-white">
+                      ${Number(acc.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
                     </td>
-                    <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <td className="py-3.5">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                         isFrozen
-                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                          : 'bg-emerald-500/10 text-emerald-400'
+                          ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                       }`}>
                         {acc.status}
                       </span>
                     </td>
-                    <td className="py-3 text-right">
+                    <td className="py-3.5 text-right">
                       {!isVault && (
                         <button
                           onClick={() => handleToggleFreeze(acc.id, acc.status)}
                           disabled={actionLoading === acc.id}
-                          className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors flex items-center space-x-1 ml-auto ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors inline-flex items-center space-x-1.5 ${
                             isFrozen
                               ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                               : 'bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/60'
                           }`}
                         >
-                          {isFrozen ? <Sun className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
-                          <span>{isFrozen ? 'Unfreeze' : 'Freeze'}</span>
+                          {isFrozen ? <Sun className="w-3.5 h-3.5" /> : <Snowflake className="w-3.5 h-3.5" />}
+                          <span>{isFrozen ? 'Unfreeze Account' : 'Freeze Account'}</span>
                         </button>
                       )}
                     </td>
