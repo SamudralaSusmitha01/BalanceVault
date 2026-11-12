@@ -1,6 +1,7 @@
 {
   "name": "balancevault",
   "version": "1.0.0",
+  "private": true,
   "description": "BalanceVault — Money movement with a ledger you can prove",
   "type": "module",
   "main": "server/src/index.js",
@@ -8,11 +9,14 @@
     "server",
     "client"
   ],
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node server/src/index.js",
     "dev": "node scripts/dev.js",
     "dev:server": "node server/src/index.js",
-    "dev:client": "npm --prefix client run dev",
+    "dev:client": "npm --workspace=client run dev",
     "build": "node scripts/build.js",
     "test": "node server/tests/run-tests.js",
     "db:generate": "node scripts/db-generate.js",
